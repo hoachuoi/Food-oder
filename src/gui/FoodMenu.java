@@ -178,9 +178,9 @@ public class FoodMenu {
 		file[2] = new String("/spaghetti.jpg");
 		file[3] = new String("/PadThai.png");
 		file[4] = new String("/RamenNoodles.png");
-		file[5] = new String("/kids spaghetti.png");
+		file[5] = new String("/kids_spaghetti.png");
 		file[6] = new String("/chickenRice.jpg");
-		file[7] = new String("/thaiFood.jpeg");
+		file[7] = new String("/thaiFood.jpg");
 		file[8] = new String("/vietnamFood.jpg");
 		foodLabel[0] = new JLabel("Salad");
 		foodLabel[1] = new JLabel("Japanese Noodles");
@@ -201,6 +201,10 @@ public class FoodMenu {
 		price[7] = 6.50;
 		price[8] = 6.50;
 		for (int i = 0; i < ELEMENTS; i++) {
+			
+			System.out.print(file[i]);	
+			try {
+			
 			Image image = ImageIO.read(this.getClass().getResource(file[i]));
 			Image imageScaled = image.getScaledInstance(80, 95, Image.SCALE_SMOOTH);
 //			Image image = ImageIO.read(file[i]);
@@ -210,6 +214,9 @@ public class FoodMenu {
 			numSpinner[i] = new JSpinner(spnummodel);
 			numSpinner[i].addChangeListener(listener);
 			foodImage[i] = new JLabel(imageIcon);
+			}catch(Exception e) {
+				System.out.print(e);
+			}
 		}
 		gbc.gridx = 0; // gridx 0 represent the most left
 		for (int i = 0; i < ELEMENTS; i++) {

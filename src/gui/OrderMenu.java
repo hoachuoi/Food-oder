@@ -148,8 +148,7 @@ public class OrderMenu {
 				}
 			}
 		});
-
-		Image image = ImageIO.read(new File("C:\\Users\\tony\\Desktop\\order.png"));
+		Image image = ImageIO.read(this.getClass().getResource("/order.png"));
 		Image imageScaled = image.getScaledInstance(80, 95, Image.SCALE_SMOOTH);
 		ImageIcon imageIcon = new ImageIcon(imageScaled);
 		JLabel lblNewLabel = new JLabel(imageIcon);
