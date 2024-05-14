@@ -1,85 +1,144 @@
 package gui;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Font;
-import java.awt.Image;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-
-import javax.imageio.ImageIO;
-import javax.swing.Box;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
-import java.awt.Panel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+
+import javax.swing.*;
+import java.awt.*;
 
 @SuppressWarnings("serial")
 public class MainMenu extends JPanel {
 	JLabel picLabel, title;
-	JButton button;
-	private Panel panel_1;
-	private Panel panel_2;
+	//JButton bttLogin;
 	static JFrame frame;
-
+    private JTextField usernameField;
+    private JPasswordField passwordField;
+    JButton loginButton = new JButton("Đăng nhập");
+    JButton registerButton = new JButton("Đăng ký");
+	private static String Url = "jdbc:mysql://localhost:3306/fastfood";
+	private static String User = "root";
+	private static String Password ="";
 	public void createAndShowGUI() throws IOException {
-		JPanel panel = new JPanel(new BorderLayout());
-		Image image = ImageIO.read(this.getClass().getResource("/food_logo.png"));
-		Image imageScaled = image.getScaledInstance(350, 300, Image.SCALE_SMOOTH);
-		ImageIcon imageIcon = new ImageIcon(imageScaled);
-		picLabel = new JLabel(imageIcon);
-		Box right = Box.createVerticalBox();
-		panel_1 = new Panel();
-		title = new JLabel("898 Food Restaurant");
-		title.setAlignmentX(Component.CENTER_ALIGNMENT);
-		title.setAlignmentY(0.0f);
-		title.setHorizontalAlignment(SwingConstants.CENTER);
-		title.setFont(new Font("Serif", Font.ITALIC + Font.BOLD, 18));
-		title.setForeground(Color.BLUE);
+        // Tạo các thành phần giao diện
+        JLabel usernameLabel = new JLabel("Tài khoản:");
+        JLabel passwordLabel = new JLabel("Mật khẩu:");
 
-		// Button, with filler
-		button = new JButton("Order Food Now >>");
-		panel_1.add(button);
-		button.setAlignmentX(Component.LEFT_ALIGNMENT);
+        usernameField = new JTextField(20);
+        passwordField = new JPasswordField(20);        
+        
+        // Thiết lập layout sử dụng GridBagLayout
+        setLayout(new GridBagLayout());
+        // Thiết lập constraints cho các thành phần
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5); // Đặt khoảng cách giữa các thành phần
+        // Thêm các thành phần vào cửa sổ
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        add(usernameLabel, gbc);
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        add(usernameField, gbc);
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        add(passwordLabel, gbc);
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        add(passwordField, gbc);
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 2; // Cho phép button chiếm 2 cột
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 1; // Đặt lại gridwidth về 1 để nút "Đăng nhập" chỉ chiếm 1 cột
+        add(loginButton, gbc);
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        gbc.gridwidth = 1; // Đặt lại gridwidth về 1 để nút "Đăng ký" chỉ chiếm 1 cột
+        add(registerButton, gbc);
 
-		panel.add(picLabel, BorderLayout.CENTER);
-		panel.add(right, BorderLayout.SOUTH);
-		right.add(title);
-		right.add(panel_1);
-		add(panel);
+        // Xử lý sự kiện đăng nhập
+        loginButton.addActionListener(new ActionListener() {
+            String user,pass;
+            boolean check =false;
+            public void actionPerformed(ActionEvent e) {
+                String username = usernameField.getText();
+                char[] password = passwordField.getPassword();
+                String passwordText = new String(password);
+                String Quyen;
+                // Thực hiện xác thực tài khoản ở đây 
+                try {
+                	Class.forName("com.mysql.jdbc.Driver");
+        			Connection conn = DriverManager.getConnection(Url,User,Password);
+        			Statement stmt = conn.createStatement();
+                    String sql1 = "SELECT * FROM user";
+                    ResultSet rs = stmt.executeQuery(sql1);
+        			while(rs.next()) {
+                        user = rs.getString("UserName");
+                        pass = rs.getString("PassWord");
+                        Quyen = rs.getString("Quyen");
+                        if (user.equals(username) && pass.equals(passwordText)) {
+                        	if(Quyen.equals("Nhân viên")) {
+                        		FoodMenu food;
+                         		try {
+                         			food = new FoodMenu();
+                         			food.createAndShowGUI();
+                         			food.setVisible(true);
+                         			setVisible(false);
+                         			frame.dispose();
+                         			} catch (IOException e1) {
+                         				e1.printStackTrace();
+                         			}
+                         		check = true;
+                        	}
+                        	if(Quyen.equals("Quản lý")) {
+                        		Manage mn;
+                         		mn = new Manage();
+								mn.main(null);
+								mn.setVisible(true);
+								setVisible(false);
+								frame.dispose();
+                         		check = true;
+                        	}
+                     		
+                        }
+                        
+        			}
+        			 
+                    if(check == false){
+                         JOptionPane.showMessageDialog(MainMenu.this, "Bạn chưa có tài khoản.Vui lòng đăng ký!");
+                         usernameField.setText("");
+                         passwordField.setText("");
+                    }
+                    rs.close();
+                    stmt.close();
+                    conn.close(); // Close the connection
+                } catch (ClassNotFoundException | SQLException exception) {
+                    exception.printStackTrace();
+                }              
+            }
+        });
+        // Xử lý sự kiện đăng ký
+        registerButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+				signup sn = new signup();
+				sn.GUI();
+            }
+        });
+    }
 
-		button.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				FoodMenu food;
-				try {
-					food = new FoodMenu();
-					food.createAndShowGUI();
-					food.setVisible(true);
-					setVisible(false);
-					frame.dispose();
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}
-		});
-	}
 
 	public static void main(String args[]) throws IOException {
 		MainMenu main = new MainMenu();
 		main.createAndShowGUI();
-		 frame = new JFrame();
-		frame.setTitle("898 Food Ordering System");
+		frame = new JFrame();
+		frame.setTitle("Fast food restaurant login");
 		frame.getContentPane().add(main);
 		frame.pack();
 		frame.setLocationRelativeTo(null);
